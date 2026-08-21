@@ -1,0 +1,92 @@
+{
+    "_comment": "Guardly — TeamSpeak 6 Server egg. Obraz: https://github.com/Guardly-Enterprise/teamspeak6-server-egg",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-08-21T23:22:03+00:00",
+    "name": "TeamSpeak 6 Server",
+    "author": "a.kraus@finoo.pl",
+    "description": "TeamSpeak 6 Server (beta). Binarki pochodza z oficjalnego obrazu TeamSpeak Systems, opakowanego w obraz zgodny z konwencja wings/elytra. Dane serwera leza w /home/container, wiec sa widoczne w menedzerze plikow i objete backupami panelu.",
+    "features": null,
+    "docker_images": {
+        "TeamSpeak 6 (Guardly)": "ghcr.io/guardly-enterprise/teamspeak6-server:latest"
+    },
+    "file_denylist": [],
+    "startup": "/opt/tsserver/tsserver --license-path /home/container --default-voice-port {{SERVER_PORT}} --filetransfer-port {{TS_FILETRANSFER_PORT}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": \"listening on 0.0.0.0:\"}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# Egg nie pobiera zadnych plikow — binarki TeamSpeak 6 sa juz w obrazie Dockera\n# (patrz Dockerfile, etap `upstream`). Instalacja tylko przygotowuje katalog\n# danych i zostawia notatke dla wlasciciela serwera.\nset -e\n\nmkdir -p /mnt/server\ncd /mnt/server\n\ncat > PRZECZYTAJ-MNIE.txt <<'TXT'\nTeamSpeak 6 Server — pierwsze uruchomienie\n==========================================\n\n1. Dane serwera (baza SQLite, logi, pliki) trzymane sa w tym katalogu.\n   Nie usuwaj tsserver.sqlitedb — to cala konfiguracja serwera.\n\n2. Po PIERWSZYM starcie zajrzyj do konsoli. Serwer wypisuje tam jednorazowo:\n     - login i haslo konta ServerQuery (serveradmin)\n     - apikey do ServerQuery\n     - ServerAdmin privilege key (token) do nadania sobie uprawnien admina\n   Te dane pojawiaja sie TYLKO raz. Skopiuj je od razu.\n\n3. Token wklejasz w kliencie TeamSpeak: Uprawnienia -> Uzyj klucza uprawnien.\n\n4. Licencja: bez pliku licensekey.dat serwer dziala w trybie bezplatnym\n   (1 serwer wirtualny, 32 sloty). Wlasny plik licencyjny wgraj do tego\n   katalogu pod nazwa licensekey.dat i zrestartuj serwer.\n   Uwaga: licencje TeamSpeak 3 NIE dzialaja z serwerem 6.\n\n5. Port glosu przydziela panel (alokacja podstawowa). Port transferu plikow\n   ustawia sie w zmiennej TS_FILETRANSFER_PORT i musi to byc port\n   przydzielony temu serwerowi w panelu.\nTXT\n\necho \"Instalacja zakonczona — binarki serwera sa w obrazie, dane w /home/container.\"\n",
+            "container": "debian:bookworm-slim",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Akceptacja licencji TeamSpeak",
+            "description": "Serwer nie wystartuje bez potwierdzenia licencji TeamSpeak. Wartosc 'accept' oznacza, ze zapoznales sie z umowa licencyjna serwera TeamSpeak i ja akceptujesz.",
+            "env_variable": "TSSERVER_LICENSE_ACCEPTED",
+            "default_value": "accept",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:accept",
+            "field_type": "text"
+        },
+        {
+            "name": "Port transferu plikow",
+            "description": "Port TCP dla transferu plikow (domyslnie 30033). MUSI byc portem przydzielonym temu serwerowi w panelu, inaczej transfer plikow nie zadziala.",
+            "env_variable": "TS_FILETRANSFER_PORT",
+            "default_value": "30033",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Query HTTP wlaczone",
+            "description": "Wlacza interfejs ServerQuery po HTTP (0 = wylaczony, 1 = wlaczony). Wymaga przydzielonego portu z pola ponizej.",
+            "env_variable": "TSSERVER_QUERY_HTTP_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "Port Query HTTP",
+            "description": "Port TCP interfejsu ServerQuery HTTP (domyslnie 10080). Uzywany tylko gdy Query HTTP jest wlaczone; musi byc portem przydzielonym w panelu.",
+            "env_variable": "TSSERVER_QUERY_HTTP_PORT",
+            "default_value": "10080",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Haslo konta serveradmin (query)",
+            "description": "Nadpisuje haslo wbudowanego konta serveradmin dla ServerQuery. Puste = serwer wylosuje haslo przy pierwszym starcie i wypisze je w konsoli.",
+            "env_variable": "TSSERVER_QUERY_ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Jeden ciagly plik logu",
+            "description": "1 = jeden rosnacy plik logu na serwer wirtualny, 0 = nowy plik przy kazdym starcie. Zalecane 1, zeby katalog logs/ nie zapelnial sie setkami plikow.",
+            "env_variable": "TSSERVER_APPEND_LOGS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+# Test obrazu POZA panelem — odtwarza warunki, w jakich uruchamia go elytra:
+# ten sam UID/GID, dane w /home/container, polecenie startowe w STARTUP.
+#
+#   mkdir -p ./dane && sudo chown 996:995 ./dane
+#   docker compose -f docker-compose.test.yml up --build
+#
+# UID 996 / GID 995 to wartosci z /etc/elytra/config.yml na naszym node.
+# Na innym node sprawdz `grep -A3 'user:' /etc/elytra/config.yml`.
+services:
+  ts6:
+    build:
+      context: .
+    user: "996:995"
+    environment:
+      SERVER_PORT: "9987"
+      TS_FILETRANSFER_PORT: "30033"
+      TSSERVER_LICENSE_ACCEPTED: "accept"
+      TSSERVER_APPEND_LOGS: "1"
+      STARTUP: "/opt/tsserver/tsserver --license-path /home/container --default-voice-port {{SERVER_PORT}} --filetransfer-port {{TS_FILETRANSFER_PORT}}"
+    ports:
+      - "9987:9987/udp"
+      - "30033:30033/tcp"
+    volumes:
+      - ./dane:/home/container
+    stop_signal: SIGINT

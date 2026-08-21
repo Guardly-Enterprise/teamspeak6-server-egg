@@ -1,0 +1,7 @@
+# katalog danych z lokalnych testow (docker-compose.test.yml)
+dane/
+*.sqlitedb
+*.sqlitedb-shm
+*.sqlitedb-wal
+licensekey.dat
+logs/
