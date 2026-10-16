@@ -8,8 +8,11 @@
 # panel montuje katalog serwera i gdzie widzi je menedzer plikow.
 #
 # Wersje przypinamy swiadomie — podniesienie serwera to zmiana TS_VERSION.
+# Kazda beta ma wbudowana licencje na ok. 3 miesiace: po jej koncu serwer konczy start
+# bledem "The default license has expired" (beta12.1 — 10.2026). 6.0.0-beta13.1 jest
+# wazna do 2026-12-01, wiec przed ta data trzeba podniesc wersje ponownie.
 
-ARG TS_VERSION=6.0.0-beta12.1
+ARG TS_VERSION=6.0.0-beta13.1
 FROM teamspeaksystems/teamspeak6-server:${TS_VERSION} AS upstream
 
 FROM debian:bookworm-slim

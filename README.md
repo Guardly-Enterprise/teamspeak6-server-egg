@@ -106,7 +106,9 @@ docker compose -f docker-compose.test.yml up --build
 
 Obraz przetestowany na Debianie 12, Docker 29.7.2, w warunkach odtwarzających panel:
 
-* serwer **6.0.0-beta12.1** startuje jako UID 996 i zapisuje dane do `/home/container`,
+* serwer **6.0.0-beta13.1** startuje jako UID 996 i zapisuje dane do `/home/container`
+  (licencja bety ważna do 2026-12-01; beta12.1 od 10.2026 kończy start błędem
+  `The default license has expired`),
 * `tsserver` jest **PID 1**, więc `SIGINT` z przycisku *Stop* zamyka go czysto
   (kod wyjścia 0, `Received signal SIGINT, shutting down` → `stopped`) — bez tego
   ryzykowałbyś uszkodzenie bazy SQLite,
